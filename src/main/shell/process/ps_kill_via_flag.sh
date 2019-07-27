@@ -1,7 +1,7 @@
 #! /bin/bash
 set -e
 if [ $# -ne 2 ];then
-        echo "USEAGE: $0 <service_flag> <signal> "
+        echo "USEAGE: $0 <flag> <signal> "
         exit 1
 fi
 

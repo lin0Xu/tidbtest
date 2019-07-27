@@ -10,28 +10,27 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.UUID;
 
-import static chaos.testcases.service.core.BaseData.PROCESS_KILL_VIA_FLAG;
-import static chaos.testcases.service.core.BaseData.PROCESS_KILL_VIA_PID;
+import static chaos.testcases.service.core.BaseData.*;
 
 @RestController
 @RequestMapping("/case")
 public class CaseController {
     private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
 
-    @GetMapping("/faultinjection/process/flag")
-    public String injectPsFaultViaFlag(@RequestParam("serviceFlag") String serviceFlag, @RequestParam("signal") Integer signal){
+    @GetMapping("/faultinjection/process/kill")
+    public String injectPsFaultViaFlag(@RequestParam("flag") String serviceFlag, @RequestParam("signal") Integer signal){
         String[] shellArgs = new String[2];
         shellArgs[0]=serviceFlag;
         shellArgs[1]=String.valueOf(signal);
-        return new CaseDispatcher().shellRun(PROCESS_KILL_VIA_FLAG,shellArgs);
+        return new CaseDispatcher().shellRun(PROCESS_KILL,shellArgs);
     }
 
-    @GetMapping("/faultinjection/process/pid")
-    public String injectPsFaultViaPid(@RequestParam("pid") String serviceFlag, @RequestParam("signal") Integer signal){
+    @GetMapping("/faultinjection/process/renice")
+    public String injectPsFaultViaPid(@RequestParam("flag") String serviceFlag, @RequestParam("signal") Integer signal){
         String[] shellArgs = new String[2];
         shellArgs[0]=serviceFlag;
         shellArgs[1]=String.valueOf(signal);
-        return new CaseDispatcher().shellRun(PROCESS_KILL_VIA_PID,shellArgs);
+        return new CaseDispatcher().shellRun(PROCESS_RENICE,shellArgs);
     }
 
 
