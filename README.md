@@ -27,3 +27,27 @@ tidbtest
    每条用例维护一个uuid，通过uuid执行该用例；
    通过用例类型(如：sql_all, sql_ddl_create, sql_ddl_alter, fault_case_all, fault_injection_process,…)批量执行该类型所有用例；执行方式可以执行并行度，并行度为1则顺序串行执行。
 6. 
+
+
+
+简单使用：
+1. 运行一个新sql testcase，并保存该case到模板库；
+```
+curl -H "Content-type:application/json" -X POST \
+--data '{"saveCase":true,
+	"sqlCase":{
+		"sqlValue":"CREATE DATABASE IF NOT EXISTS tpcds_test_db; use tpcds_test_db;create table IF NOT EXISTS et_store_sales(ss_sold_date_sk bigint,ss_net_profit decimal(7,2)); show create table et_store_sales; drop table et_store_sales;drop database tpcds_test_db;",
+    	"sqlType":"DDL_CREATE",
+    	"description":"tpcds_sql-创建DB-创建表-删除表-删除db"
+	}
+}' \
+http://localhost:9091/case/sql/case/run
+
++------+--------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+------------+-------------------------------------------------+------------------+
+| id   | uuid                                 | sql_val                                                                                                                                                                                                                                               | sql_type   | description                                     | create_timestamp |
++------+--------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+------------+-------------------------------------------------+------------------+
+| 1008 | 9f732452-3bb8-4109-8063-5807835e3224 | CREATE DATABASE IF NOT EXISTS tpcds_test_db; use tpcds_test_db;create table IF NOT EXISTS et_store_sales(ss_sold_date_sk bigint,ss_net_profit decimal(7,2)); show create table et_store_sales; drop table et_store_sales;drop database tpcds_test_db; | DDL_CREATE | tpcds_sql-创建DB-创建表-删除表-删除db           | 1564236215090    |
+
+```
+
+

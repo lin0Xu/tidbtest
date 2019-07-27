@@ -1,6 +1,7 @@
 package chaos.testcases.service.controller;
 
 import chaos.testcases.service.model.SqlCase;
+import chaos.testcases.service.model.SqlCaseTemplate;
 import chaos.testcases.service.repository.SqlCaseRepository;
 import chaos.testcases.service.tools.CaseDispatcher;
 import com.alibaba.fastjson.JSONObject;
@@ -39,13 +40,18 @@ public class CaseController {
 
     @PostMapping(value = "/sql/case/run", produces = "application/json;charset=UTF-8")
     @ResponseBody
-    public void inject(@RequestBody JSONObject sqlCaseJson){
-        SqlCase sqlCase = sqlCaseJson.toJavaObject(SqlCase.class);
-        sqlCase.setCreateTimestamp(String.valueOf(System.currentTimeMillis()));
-        sqlCase.setUuid(UUID.randomUUID().toString());
+    public void inject(@RequestBody JSONObject paramJpson){
+        SqlCaseTemplate sqlCaseTemplate = paramJpson.toJavaObject(SqlCaseTemplate.class);
 
-        sqlCaseRepository.save(sqlCase);
-        LOGGER.info("# SAVE SQL case succeed,uuid: " + sqlCase.getUuid());
+        boolean saveCase = sqlCaseTemplate.isSaveCase();
+        SqlCase sqlCase = sqlCaseTemplate.getSqlCase();
+
+        if(saveCase){
+            sqlCase.setCreateTimestamp(String.valueOf(System.currentTimeMillis()));
+            sqlCase.setUuid(UUID.randomUUID().toString());
+            sqlCaseRepository.save(sqlCase);
+            LOGGER.info("# SAVE SQL case succeed,uuid: " + sqlCase.getUuid());
+        }
     }
 
 
