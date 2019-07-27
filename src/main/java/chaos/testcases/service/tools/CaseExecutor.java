@@ -4,9 +4,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.*;
+
+import static chaos.testcases.service.core.BaseData.DST_DB_CON_STR;
+import static chaos.testcases.service.core.BaseData.MAX_SQL_RUN_PARALLEL;
 
 public class CaseExecutor implements Callable<String> {
     private static final Logger LOGGER = LoggerFactory.getLogger(CaseExecutor.class);
@@ -46,8 +50,7 @@ public class CaseExecutor implements Callable<String> {
     }
 
     public String call(){
-        Thread.currentThread().setName("_case_executor_");
-        // ArrayList 转换成数组；
+        Thread.currentThread().setName("_fault_exec_");
         Integer exitCode = -1;
 
         Future<String> streamRead = null;
@@ -137,4 +140,23 @@ public class CaseExecutor implements Callable<String> {
         }
         return sBuf.toString();
     }
+
+    public static void main(String args[]){
+
+        List<String> sqls = new ArrayList<>();
+
+        for(int i=0;i<200;i++){
+            String dbName = "tpcds_test_db_"+i;
+            String tblName = "et_store_sales" + i;
+
+            String sql = "CREATE DATABASE IF NOT EXISTS " + dbName + ";use "+ dbName +";create table IF NOT EXISTS "+tblName+
+                    "(ss_sold_date_sk bigint,ss_net_profit decimal(7,2)); show create table "+tblName+"; drop table "+
+                    tblName + ";drop database "+dbName+";";
+            LOGGER.info("sql_"+i+sql);
+            sqls.add(sql);
+        }
+
+        SqlExecutor.sqlRun(5, sqls);
+    }
+
 }

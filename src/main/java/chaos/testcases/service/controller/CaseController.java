@@ -38,9 +38,13 @@ public class CaseController {
         return new CaseDispatcher().shellRun(PROCESS_RENICE,shellArgs);
     }
 
-    @PostMapping(value = "/sql/case/run", produces = "application/json;charset=UTF-8")
+    /**
+     * 执行一次sql case，并选择性保存case到用例库；
+     * @param paramJpson
+     */
+    @PostMapping(value = "/sql/submit", produces = "application/json;charset=UTF-8")
     @ResponseBody
-    public void inject(@RequestBody JSONObject paramJpson){
+    public void sqlSubmit(@RequestBody JSONObject paramJpson){
         SqlCaseTemplate sqlCaseTemplate = paramJpson.toJavaObject(SqlCaseTemplate.class);
 
         boolean saveCase = sqlCaseTemplate.isSaveCase();
@@ -52,7 +56,30 @@ public class CaseController {
             sqlCaseRepository.save(sqlCase);
             LOGGER.info("# SAVE SQL case succeed,uuid: " + sqlCase.getUuid());
         }
+
     }
 
+
+
+    /**
+     * 支持按照sql_type批量run sql case，设置case执行并行度
+     * @param parallel
+     * @param type
+     */
+    @GetMapping("/sql/type/batchrun")
+    public void batchRunSameTypeSql(@RequestParam("parallel") Integer parallel, @RequestParam("type") String type){
+
+
+    }
+
+    /**
+     * 支持按照case库中前num数sqlcase 批量执行，可设置并行度
+     * @param parallel
+     * @param num
+     */
+    @GetMapping("/sql/rnd/batchrun")
+    public void batchRunRndTypeSql(@RequestParam("parallel") Integer parallel, @RequestParam("num") Integer num){
+
+    }
 
 }
