@@ -8,7 +8,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-import static chaos.testcases.service.core.BaseData.PROCESS_SERVICE_PIDS;
 
 public class TestCaseProvider {
     private static final Logger logger = LoggerFactory.getLogger(TestCaseProvider.class);
@@ -47,16 +46,4 @@ public class TestCaseProvider {
         String result = caseExec(shellFile, shellArgs);
         return result;
     }
-
-    /**
-     * 获取服务pids;
-     * @param serviceFlag
-     * @return
-     */
-    public String getPids(String serviceFlag){
-        String[] shellArgs = new String[1];
-        shellArgs[0]=serviceFlag;
-        return caseExec(PROCESS_SERVICE_PIDS, shellArgs);
-    }
-
 }
