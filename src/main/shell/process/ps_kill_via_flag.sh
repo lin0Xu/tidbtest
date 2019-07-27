@@ -22,7 +22,7 @@ if [ ${ps_num} -eq 1 ]; then
     log_print "kill -${signal} $pid Finished."
     exit 0;
 else
-    log_print "rocess num larger than 1. pids: $pid, BEGIN batch kill -${signal} $pid"
+    log_print "process num larger than 1. pids: $pid, BEGIN batch kill -${signal} $pid"
     nohup echo $pid | xargs kill -${signal} 1>/dev/null 2>&1 &
     log_print "batch kill -${signal} $pid Finished."
     exit 0;
