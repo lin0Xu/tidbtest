@@ -1,5 +1,6 @@
 package chaos.testcases.service.tools;
 
+import chaos.testcases.service.model.SqlCase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -143,16 +144,23 @@ public class CaseExecutor implements Callable<String> {
 
     public static void main(String args[]){
 
-        List<String> sqls = new ArrayList<>();
-        for(int i=0;i<500;i++){
+        int n=300;
+        List<SqlCase> sqlCaseList = new ArrayList<>();
+//        List<String> sqls = new ArrayList<>();
+
+        for(int i=0;i<n;i++){
+            SqlCase sqlCase = new SqlCase();
+            sqlCase.setSqlType("ddl");
             String dbName = "tpcds_test_db_"+i;
             String tblName = "et_store_sales" + i;
             String sql = "CREATE DATABASE IF NOT EXISTS " + dbName + ";" +"create table IF NOT EXISTS "+dbName+"."+tblName+ "(ss_sold_date_sk bigint,ss_net_profit decimal(7,2)); show create table "+dbName+"."+tblName+"; drop table "+ dbName+"."+tblName + ";drop database "+dbName+";";
 
+            sqlCase.setSqlValue(sql);
+
             LOGGER.info("sql_"+i+sql);
-            sqls.add(sql);
+            sqlCaseList.add(sqlCase);
         }
-//        SqlExecutor.sqlBatchRun(10, sqls);
+        SqlExecutor.sqlBatchRun(10, sqlCaseList);
 
     }
 

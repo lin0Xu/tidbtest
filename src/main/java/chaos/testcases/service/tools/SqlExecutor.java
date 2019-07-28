@@ -120,6 +120,7 @@ public class SqlExecutor implements Callable<Boolean> {
 //        }
 //    }
 
+
     public static void sqlBatchRun(int parallel, List<SqlCase> sqls){
         Statement stmt = null;
         ResultSet rs = null;
