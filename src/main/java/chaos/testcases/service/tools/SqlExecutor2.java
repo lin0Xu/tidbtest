@@ -1,14 +1,12 @@
 package chaos.testcases.service.tools;
 
 import chaos.testcases.service.model.SqlCase;
-import com.sun.org.apache.xpath.internal.operations.Bool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -16,57 +14,43 @@ import java.util.concurrent.Executors;
 import static chaos.testcases.service.core.BaseData.DST_DB_CON_STR;
 import static chaos.testcases.service.core.BaseData.MAX_SQL_RUN_PARALLEL;
 
-public class SqlExecutor implements Callable<Boolean> {
-    private static final Logger LOGGER = LoggerFactory.getLogger(SqlExecutor.class);
+public class SqlExecutor2 implements Callable<Boolean> {
+    private static final Logger LOGGER = LoggerFactory.getLogger(SqlExecutor2.class);
 
     // 一个sqlCase大多情况包含多条sql语句；
-    private String sqlCase;
+    private String[] sqlCases;
     private Connection con;
 
-    public SqlExecutor(){}
-    public SqlExecutor(String sqlCase, Connection con){
-        this.sqlCase = sqlCase;
+    public SqlExecutor2(String[] sqlCases, Connection con){
+        this.sqlCases = sqlCases;
         this.con = con;
     }
 
-
     public Boolean call(){
-        Statement stmt = null;
+//        Thread.currentThread().setName("_sql_exec_");
         try{
-            synchronized (this){
-                String sql = sqlCase;
-                LOGGER.info("Thread sql:"+sql);
-                String[] sqlArr = sql.split(";");
-                stmt = con.createStatement();
-                LOGGER.info("### Begin sql RUN.");
-                for (int i=0;i<sqlArr.length;i++){
-                    sqlArr[i] = sqlArr[i].trim();
-                    if(sqlArr[i].length()>2) {
-                        LOGGER.info("#i:"+i+",sql:"+sqlArr[i]);
-                        stmt.execute(sqlArr[i]);
+            synchronized (sqlCases){
+                for(String sqlCase: sqlCases){
+                    String[] sqlArr = sqlCase.split(";");
+                    Statement stmt = con.createStatement();
+                    LOGGER.info("### Begin sql RUN.");
+                    for (int i=0;i<sqlArr.length;i++){
+                        sqlArr[i] = sqlArr[i].trim();
+                        if(sqlArr[i].length()>2) {
+                            LOGGER.info("#i:"+i+",sql:"+sqlArr[i]);
+                            stmt.execute(sqlArr[i]);
+                        }
                     }
+                    LOGGER.info("++sql:"+sqlCase);
+                    LOGGER.info("### END sql RUN.");
                 }
-                try{
-                    stmt.wait();
-                }catch (InterruptedException e){
-                    e.printStackTrace();
-                }
-                LOGGER.info("### END sql RUN.");
             }
+
         }catch(SQLException e){
             LOGGER.error("sql Run Unexpected.");
             e.printStackTrace();
-        }finally {
-            if(null != stmt){
-                try{
-                    stmt.close();
-                }catch(SQLException ex){
-                    ex.printStackTrace();
-                }
-            }
         }
 
-        LOGGER.info("++sql:"+this.sqlCase);
         return true;
     }
 
@@ -77,17 +61,19 @@ public class SqlExecutor implements Callable<Boolean> {
         if(parallel > MAX_SQL_RUN_PARALLEL)
             parallel = MAX_SQL_RUN_PARALLEL;
         ExecutorService executors = Executors.newFixedThreadPool(parallel);
-
+        String[] sql = new String[1];
+        sql[0] = sqlCase.getSqlValue();
         try{
             Class.forName("com.mysql.cj.jdbc.Driver").newInstance();
             Connection conn = DriverManager.getConnection(DST_DB_CON_STR);
             for (int i=0;i<loop;i++){
-                executors.submit(new SqlExecutor(sqlCase.getSqlValue(), conn));
+                executors.submit(new SqlExecutor2(sql, conn));
             }
         }catch (Exception e){
             e.printStackTrace();
         }finally {
             if(null!=executors && executors.isTerminated()){
+                LOGGER.info("+++++++++++++++++++++++");
                 executors.shutdown();
                 executors = null;
                 if (rs != null) {
@@ -129,11 +115,9 @@ public class SqlExecutor implements Callable<Boolean> {
             Class.forName("com.mysql.cj.jdbc.Driver").newInstance();
             Connection conn = DriverManager.getConnection(DST_DB_CON_STR);
 
-            synchronized (sqls){
-                for (String sql:sqls){
-                    executors.submit(new SqlExecutor(sql, conn));
-                }
-            }
+            String[] sqlArr = new String[sqls.size()];
+            sqls.toArray(sqlArr);
+            executors.submit(new SqlExecutor2(sqlArr, conn));
 
         }catch (Exception e){
             e.printStackTrace();

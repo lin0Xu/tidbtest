@@ -144,19 +144,16 @@ public class CaseExecutor implements Callable<String> {
     public static void main(String args[]){
 
         List<String> sqls = new ArrayList<>();
-
-        for(int i=0;i<200;i++){
+        for(int i=0;i<500;i++){
             String dbName = "tpcds_test_db_"+i;
             String tblName = "et_store_sales" + i;
+            String sql = "CREATE DATABASE IF NOT EXISTS " + dbName + ";" +"create table IF NOT EXISTS "+dbName+"."+tblName+ "(ss_sold_date_sk bigint,ss_net_profit decimal(7,2)); show create table "+dbName+"."+tblName+"; drop table "+ dbName+"."+tblName + ";drop database "+dbName+";";
 
-            String sql = "CREATE DATABASE IF NOT EXISTS " + dbName + ";use "+ dbName +";create table IF NOT EXISTS "+tblName+
-                    "(ss_sold_date_sk bigint,ss_net_profit decimal(7,2)); show create table "+tblName+"; drop table "+
-                    tblName + ";drop database "+dbName+";";
             LOGGER.info("sql_"+i+sql);
             sqls.add(sql);
         }
+        SqlExecutor.sqlBatchRun(10, sqls);
 
-        SqlExecutor.sqlBatchRun(5, sqls);
     }
 
 }
