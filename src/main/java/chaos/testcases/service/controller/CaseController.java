@@ -5,6 +5,7 @@ import chaos.testcases.service.model.SqlCaseTemplate;
 import chaos.testcases.service.repository.SqlCaseRepository;
 import chaos.testcases.service.tools.CaseDispatcher;
 import chaos.testcases.service.tools.SqlExecutor;
+import chaos.testcases.service.tools.TransactionExecutor;
 import com.alibaba.fastjson.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,7 +61,7 @@ public class CaseController {
             sqlCaseSaved = sqlCaseRepository.save(sqlCase);
             LOGGER.info("# SAVE SQL case succeed,uuid: " + sqlCase.getUuid());
         }
-        SqlExecutor.signalSqlRun(sqlCaseSaved, parallel,loop);
+        SqlExecutor.signalSqlRun(sqlCase, parallel,loop);
     }
 
 
@@ -72,7 +73,7 @@ public class CaseController {
     @GetMapping("/sql/type/batchrun")
     public void batchRunSameTypeSql(@RequestParam("parallel") Integer parallel, @RequestParam("type") String type){
         List<SqlCase> sqlcases = sqlCaseRepository.findByType(type);
-        SqlExecutor.sqlBatchRun(sqlcases, parallel);
+        SqlExecutor.sqlBatchRun(parallel, sqlcases);
     }
 
     /**
@@ -83,7 +84,8 @@ public class CaseController {
     @GetMapping("/sql/rnd/batchrun")
     public void batchRunRndTypeSql(@RequestParam("parallel") Integer parallel, @RequestParam("num") Integer num){
         List<SqlCase> sqlCases = sqlCaseRepository.findHeadN(num);
-        SqlExecutor.sqlBatchRun(sqlCases, parallel);
+        SqlExecutor.sqlBatchRun(parallel, sqlCases);
     }
+
 
 }

@@ -152,7 +152,7 @@ public class CaseExecutor implements Callable<String> {
             LOGGER.info("sql_"+i+sql);
             sqls.add(sql);
         }
-        SqlExecutor.sqlBatchRun(10, sqls);
+//        SqlExecutor.sqlBatchRun(10, sqls);
 
     }
 

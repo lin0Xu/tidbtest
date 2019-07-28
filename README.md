@@ -30,8 +30,12 @@ tidbtest
 
 
 
-简单使用：
-1. 运行一个新sql testcase，并保存该case到模板库；
+用例维护和执行：
+1.故障case:
+
+2.sql case：
+
+2.1. 运行一个新sql testcase，并保存该case到模板库；
 ```
 curl -H "Content-type:application/json" -X POST \
 --data '{"saveCase":true,
@@ -51,3 +55,78 @@ http://localhost:9091/case/sql/case/run
 | 2507 | cd791074-6de6-4f8a-b921-5449eb282ded | CREATE DATABASE IF NOT EXISTS tpcds_test_db_0;use tpcds_test_db_0;create table IF NOT EXISTS et_store_sales0( ss_sold_date_sk bigint, ss_sold_time_sk bigint, ss_item_sk bigint, ss_customer_sk bigint, ss_cdemo_sk bigint, ss_hdemo_sk bigint, ss_addr_sk bigint, ss_store_sk bigint, ss_promo_sk bigint, ss_ticket_number bigint, ss_quantity int, ss_wholesale_cost decimal(7,2), ss_list_price decimal(7,2), ss_sales_price decimal(7,2), ss_ext_discount_amt decimal(7,2), ss_ext_sales_price decimal(7,2), ss_ext_wholesale_cost decimal(7,2), ss_ext_list_price decimal(7,2), ss_ext_tax decimal(7,2), ss_coupon_amt decimal(7,2), ss_net_paid decimal(7,2), ss_net_paid_inc_tax decimal(7,2), ss_net_profit decimal(7,2)); ALTER TABLE et_store_sales0 CHANGE COLUMN ss_cdemo_sk ss_cdemo_sk_new_test bigint; drop table et_store_sales0;drop database tpcds_test_db_0;                | DDL_ALTER  | tpcds_sql-创建DB-创建表-修改表(change column)-删除表-删除db              | 1564281029228    |
 ```
 
+2.2. 运行一个事务case:
+
+```
+前置准备：
+CREATE DATABASE IF NOT EXISTS transaction_db_test;
+create table IF NOT EXISTS transaction_db_test.trans_tbl_test(`id` int(11) NOT NULL AUTO_INCREMENT, `user_id` varchar(128) NOT NULL,`account_val` bigint NOT NULL, PRIMARY KEY (`id`));
+alter table transaction_db_test.trans_tbl_test add UNIQUE INDEX (user_id);
+INSERT INTO transaction_db_test.trans_tbl_test(user_id, account_val) VALUES ("u_00001", 0);
+INSERT INTO transaction_db_test.trans_tbl_test(user_id, account_val) VALUES ("u_00002", 4000);
+```
+
+(1) 事务提交case：
+```
+curl -H "Content-type:application/json" -X POST \
+--data '{"saveCase":true,"sqlCase":{"sqlValue":"update transaction_db_test.trans_tbl_test set account_val = (account_val+500) where user_id=\"u_00001\"; update transaction_db_test.trans_tbl_test set account_val = (account_val-500) where user_id=\"u_00002\";","sqlType":"transaction_sql","description":"事务-多次update-commited"},"runOpt":{"loop":1,"parallel":2}}' \
+http://localhost:9091/case/sql/submit
+
+| 3508 | eacf84c6-b842-4728-9159-546db786234f | update transaction_db_test.trans_tbl_test set account_val = (account_val+500) where user_id="u_00001"; update transaction_db_test.trans_tbl_test set account_val = (account_val-500) where user_id="u_00002";    | transaction_sql | 事务-多次update-commited                                                 | 1564323052364    |
+
+log:
+2019-07-28 22:10:52.528  INFO 36596 --- [ool-15-thread-1] c.t.service.tools.TransactionExecutor    : sql transaction commited.
+
+mysql> select * from trans_tbl_test;
++----+---------+-------------+
+| id | user_id | account_val |
++----+---------+-------------+
+|  1 | u_00001 |         500 |
+|  2 | u_00002 |        3500 |
++----+---------+-------------+
+2 rows in set (0.01 sec)
+
+mysql> select * from trans_tbl_test;
++----+---------+-------------+
+| id | user_id | account_val |
++----+---------+-------------+
+|  1 | u_00001 |        1000 |
+|  2 | u_00002 |        3000 |
++----+---------+-------------+
+2 rows in set (0.00 sec)
+
+```
+
+(2)事务回滚case:
+
+```
+新增一个事务胡回滚case,并保存case；
+curl -H "Content-type:application/json" -X POST \
+--data '{"saveCase":true,"sqlCase":{"sqlValue":"update transaction_db_test.trans_tbl_test set account_val = (account_val-500) where user_id=\"u_00001\"; update transaction_db_test.trans_tbl_test set account_val = (account_val+500) where user_id=\"u_00002\"; INSERT INTO transaction_db_test.trans_tbl_test(user_id, account_val) VALUES (\"u_00001\", 5000);","sqlType":"transaction_sql","description":"事务-多次update-insert-rollbacked"},"runOpt":{"loop":1,"parallel":2}}' \
+http://localhost:9091/case/sql/submit
+
+log：
+2019-07-28 22:15:45.323 ERROR 36596 --- [ool-18-thread-1] c.t.service.tools.TransactionExecutor    : sql transcation rollback.
+
+事务-回滚-case：
+| 3510 | 40925b7b-5a70-46ff-8a85-253afd9faf14 | update transaction_db_test.trans_tbl_test set account_val = (account_val-500) where user_id="u_00001"; update transaction_db_test.trans_tbl_test set account_val = (account_val+500) where user_id="u_00002"; INSERT INTO transaction_db_test.trans_tbl_test(user_id, account_val) VALUES ("u_00001", 5000);       | transaction_sql | 事务-多次update-insert-rollbacked                                        | 1564323345148    |
+
+mysql> select * from trans_tbl_test;
++----+---------+-------------+
+| id | user_id | account_val |
++----+---------+-------------+
+|  1 | u_00001 |        1000 |
+|  2 | u_00002 |        3000 |
++----+---------+-------------+
+2 rows in set (0.00 sec)
+
+mysql> select * from trans_tbl_test;
++----+---------+-------------+
+| id | user_id | account_val |
++----+---------+-------------+
+|  1 | u_00001 |        1000 |
+|  2 | u_00002 |        3000 |
++----+---------+-------------+
+2 rows in set (0.00 sec)
+
+```
