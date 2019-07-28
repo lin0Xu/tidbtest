@@ -4,12 +4,14 @@ import chaos.testcases.service.model.SqlCase;
 import chaos.testcases.service.model.SqlCaseTemplate;
 import chaos.testcases.service.repository.SqlCaseRepository;
 import chaos.testcases.service.tools.CaseDispatcher;
+import chaos.testcases.service.tools.SqlExecutor;
 import com.alibaba.fastjson.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 import static chaos.testcases.service.core.BaseData.*;
@@ -39,26 +41,27 @@ public class CaseController {
     }
 
     /**
-     * 执行一次sql case，并选择性保存case到用例库；
+     * 执行一次sql case，并选择性保存case到用例库, case是否批量执行，批量执行并行度设置；
      * @param paramJpson
      */
     @PostMapping(value = "/sql/submit", produces = "application/json;charset=UTF-8")
     @ResponseBody
     public void sqlSubmit(@RequestBody JSONObject paramJpson){
         SqlCaseTemplate sqlCaseTemplate = paramJpson.toJavaObject(SqlCaseTemplate.class);
-
+        SqlCase sqlCaseSaved = null;
         boolean saveCase = sqlCaseTemplate.isSaveCase();
         SqlCase sqlCase = sqlCaseTemplate.getSqlCase();
+        int parallel = sqlCaseTemplate.getRunOpt().getParallel();
+        int loop = sqlCaseTemplate.getRunOpt().getLoop();
 
         if(saveCase){
             sqlCase.setCreateTimestamp(String.valueOf(System.currentTimeMillis()));
             sqlCase.setUuid(UUID.randomUUID().toString());
-            sqlCaseRepository.save(sqlCase);
+            sqlCaseSaved = sqlCaseRepository.save(sqlCase);
             LOGGER.info("# SAVE SQL case succeed,uuid: " + sqlCase.getUuid());
         }
-
+        SqlExecutor.signalSqlRun(sqlCaseSaved, parallel,loop);
     }
-
 
 
     /**
@@ -68,8 +71,8 @@ public class CaseController {
      */
     @GetMapping("/sql/type/batchrun")
     public void batchRunSameTypeSql(@RequestParam("parallel") Integer parallel, @RequestParam("type") String type){
-
-
+        List<SqlCase> sqlcases = sqlCaseRepository.findByType(type);
+        SqlExecutor.sqlBatchRun(sqlcases, parallel);
     }
 
     /**
@@ -79,7 +82,8 @@ public class CaseController {
      */
     @GetMapping("/sql/rnd/batchrun")
     public void batchRunRndTypeSql(@RequestParam("parallel") Integer parallel, @RequestParam("num") Integer num){
-
+        List<SqlCase> sqlCases = sqlCaseRepository.findHeadN(num);
+        SqlExecutor.sqlBatchRun(sqlCases, parallel);
     }
 
 }

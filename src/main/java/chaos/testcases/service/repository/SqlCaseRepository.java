@@ -12,5 +12,8 @@ public interface SqlCaseRepository extends JpaRepository<SqlCase,String> {
     SqlCase findOne(String uuid);
 
     @Query(value = "select * from sql_case where sql_type=?1", nativeQuery = true)
-    List<SqlCase> FindByType(String type);
+    List<SqlCase> findByType(String type);
+
+    @Query(value = "select * from sql_case limit ?1", nativeQuery = true)
+    List<SqlCase> findHeadN(Integer n);
 }

@@ -4,6 +4,7 @@ public class SqlCaseTemplate {
 
     private boolean saveCase;
     private SqlCase sqlCase;
+    private RunOpt runOpt;
 
     public SqlCaseTemplate(){}
 
@@ -21,5 +22,13 @@ public class SqlCaseTemplate {
 
     public void setSqlCase(SqlCase sqlCase) {
         this.sqlCase = sqlCase;
+    }
+
+    public RunOpt getRunOpt() {
+        return runOpt;
+    }
+
+    public void setRunOpt(RunOpt runOpt) {
+        this.runOpt = runOpt;
     }
 }

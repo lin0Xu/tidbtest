@@ -17,6 +17,6 @@ public class SqlCaseServiceImpl implements SqlCaseService {
         return sqlCase;
     }
     public List<SqlCase> FindByType(String type){
-        return sqlCaseRepository.FindByType(type);
+        return sqlCaseRepository.findByType(type);
     }
 }

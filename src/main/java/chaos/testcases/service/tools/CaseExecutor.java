@@ -156,7 +156,7 @@ public class CaseExecutor implements Callable<String> {
             sqls.add(sql);
         }
 
-        SqlExecutor.sqlRun(5, sqls);
+        SqlExecutor.sqlBatchRun(5, sqls);
     }
 
 }
