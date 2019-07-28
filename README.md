@@ -23,11 +23,9 @@ tidbtest
    api调用指定uuid撤销关联注入的故障；故障持续时长由调用方通过触发故障和撤销故障控制；
 4. 用例新增和立即执行能力：
    提供API方式，通过参数可控制，用例一次执行的用例是否保存到用例库；
-5. 提供但用例执行和批量用例执行的能力：
+5. 提供单用例执行和批量用例执行的能力：
    每条用例维护一个uuid，通过uuid执行该用例；
-   通过用例类型(如：sql_all, sql_ddl_create, sql_ddl_alter, fault_case_all, fault_injection_process,…)批量执行该类型所有用例；执行方式可以执行并行度，并行度为1则顺序串行执行。
-6. 
-
+   通过用例类型(如：sql_all, sql_ddl_create, sql_ddl_alter, fault_case_all, fault_injection_process,traction_sql…)批量执行该类型所有用例；执行方式可以执行并行度，并行度为1则顺序串行执行。
 
 
 用例维护和执行：
@@ -151,6 +149,15 @@ mysql> select * from trans_tbl_test;
 （1）使用脚本调用 以上case执行接口构造稳定压力，目的：让TiDB集群 tps、qps维持在比较稳定的业务状态：
 脚本如下：
 
+#! /bin/bash
+
+loop=$1
+for i in `seq 1 $loop`;do
+curl -X GET "localhost:9091/case/sql/rnd/batchrun?parallel=3&num=3&loop=10"
+echo "#i: $i"
+sleep 3s
+done
+echo "#### done"
 
 （2）在恒定业务压力下，注入以下故障，并对应关注：
   （2.1） kill 一个tikv-server进程；
@@ -158,6 +165,22 @@ mysql> select * from trans_tbl_test;
           (b)在kill掉的节点上线后，qps恢复稳定；
 
 
+   (2.2) 其他场景有：
+        分别kill掉3节点pd集群的lead、follower;
+        kill掉3节点tidb-server中的1个、2个节点；
+        kill掉3节点tikv-server中的1个tikv-server；
+        模拟多个tikv-server存储磁盘故障：inode不足、目录写失败、写负载高、读负载高、读写负载高、节点下线、节点频繁上下线；
+        模拟tikv-server与pd-leader间网络异常：延迟高、丢包、包乱序；
+        模拟tidb-server与pd-leader间网络异常：延迟高、丢包、包乱序；
+        模拟tikv-server与tidb-server间网络异常：延迟高、丢包、包乱序；
+        模拟pd-cluster内部节点间网络异常对于leader选举，元数据写入的影响；
+        模拟tikv-server间网络异常对于数据同步的影响；
+        模拟tidb-server节点cpu/内存高负载场景；
+
+        以上故障场景模拟之后，关注的指标有：
+        a. 对于业务正确执行的影响；
+        b. 对于数据存储正确性的影响；
+        c. tpc/qps的影响，以及异常恢复后，tps/qps是否回归正常水位；
 
 ```
 
