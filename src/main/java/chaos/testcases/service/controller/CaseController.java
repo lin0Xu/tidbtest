@@ -1,5 +1,6 @@
 package chaos.testcases.service.controller;
 
+import chaos.testcases.service.core.NetworkParam;
 import chaos.testcases.service.core.Result;
 import chaos.testcases.service.core.ResultCode;
 import chaos.testcases.service.model.SqlCase;
@@ -41,6 +42,45 @@ public class CaseController {
         shellArgs[0]=serviceFlag;
         shellArgs[1]=String.valueOf(signal);
         return new CaseDispatcher().shellRun(PROCESS_RENICE,shellArgs);
+    }
+
+    @RequestMapping(value = "/system/network", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+    @ResponseBody
+    public Result inserNetFault(@RequestBody JSONObject netJson){
+        Result result = new Result();
+        NetworkParam param = netJson.toJavaObject(NetworkParam.class);
+
+        ResultCode resultCode = new FaultInject().injectNetworkFault(param);
+        if(resultCode.getCode().equals(200)) {
+            LOGGER.info("Fault Revoke SUCCEED");
+            result.setCode(resultCode.getCode());
+            result.setMessage("Fault Revoke SUCCEED.");
+            result.setData(param==null || param.getType()==null ? "":param.getType());
+        } else {
+            LOGGER.error("Fault Revoke FAILED");
+            result.setCode(resultCode.getCode());
+            result.setMessage("Fault Revoke FAILED.");
+            result.setData(param==null || param.getType()==null ? "":param.getType());
+        }
+        return result;
+    }
+
+    @GetMapping("/system/network/revoke")
+    public Result revokeNetFault(@RequestParam("device") String device){
+        Result result = new Result();
+        ResultCode resultCode = new FaultInject().revokeNetFault(device);
+        if(resultCode.getCode().equals(200)) {
+            LOGGER.info("Fault Revoke SUCCEED");
+            result.setCode(resultCode.getCode());
+            result.setMessage("Fault Revoke SUCCEED.");
+            result.setData(device);
+        } else {
+            LOGGER.error("Fault Revoke FAILED");
+            result.setCode(resultCode.getCode());
+            result.setMessage("Fault Revoke FAILED.");
+            result.setData(device);
+        }
+        return result;
     }
 
     @GetMapping("/system/disk/capacity")

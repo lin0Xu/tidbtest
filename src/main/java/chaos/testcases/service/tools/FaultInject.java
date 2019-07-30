@@ -1,5 +1,6 @@
 package chaos.testcases.service.tools;
 
+import chaos.testcases.service.core.NetworkParam;
 import chaos.testcases.service.core.ResultCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -89,4 +90,83 @@ public class FaultInject {
         else
             return ResultCode.SUCCESS;
     }
+
+    /**
+     * delay/loss/busy 网络故障注入
+     * @param parm
+     * @return
+     */
+    public ResultCode injectNetworkFault(NetworkParam parm){
+        if(null==parm || null == parm.getType()) {
+            LOGGER.error("Requst param illegal.");
+            return ResultCode.FAIL;
+        }
+        String type=parm.getType();
+        String result=null;
+
+        String[] shellArgs = new String[6*2];
+        int paramNums=0;
+        if(! (parm.getDevice()==null || parm.getDevice().isEmpty()) ){
+            shellArgs[paramNums++] = "-i";
+            shellArgs[paramNums++]=parm.getDevice();
+        }
+
+        if("delay".equals(type)){
+            //autotc.sh -i eth0 -d 3000ms sport 7001
+            if(! (parm.getDelayTime()==null || parm.getDelayTime().isEmpty()) ){
+                shellArgs[paramNums++] = "-d";
+                shellArgs[paramNums++]=parm.getDelayTime();
+            }
+            result = new CaseDispatcher().shellRun(NETWORK_FAULT_INJECT, shellArgs);
+        }else if("loss".equals(type)){
+            //autotc.sh -i eth0 -l 30% sport 7001
+            if(! (parm.getLossPercent()==null || parm.getLossPercent().isEmpty()) ){
+                shellArgs[paramNums++] = "-l";
+                shellArgs[paramNums++]=parm.getLossPercent();
+            }
+        }else if("busy".equals(type)){
+            //./autotc.sh -b 1kbps src 127.0.0.1 dport 3306
+            if(! (parm.getBwCeiling()==null || parm.getBwCeiling().isEmpty()) ){
+                shellArgs[paramNums++] = "-b";
+                shellArgs[paramNums++]=parm.getBwCeiling();
+            }
+        }else {
+            result = null;
+            LOGGER.error("Network falut type need be specified as loss OR delay OR busy.");
+        }
+        if(! (parm.getSport()==null || parm.getSport().isEmpty()) ){
+            shellArgs[paramNums++] = "sport";
+            shellArgs[paramNums++]=parm.getSport();
+        }
+        if(! (parm.getDport()==null || parm.getDport().isEmpty()) ){
+            shellArgs[paramNums++] = "dport";
+            shellArgs[paramNums++]=parm.getDport();
+        }
+        if(! (parm.getSrc()==null || parm.getSrc().isEmpty()) ){
+            shellArgs[paramNums++] = "src";
+            shellArgs[paramNums++]=parm.getSrc();
+        }
+        if(! (parm.getDst()==null || parm.getDst().isEmpty()) ){
+            shellArgs[paramNums++] = "dst";
+            shellArgs[paramNums++]=parm.getDst();
+        }
+
+        result = new CaseDispatcher().shellRun(NETWORK_FAULT_INJECT, shellArgs);
+        return resultValidate(result);
+    }
+
+    /**
+     * 撤销device网卡上网络故障
+     * @param device
+     * @return
+     */
+    public ResultCode revokeNetFault(String device){
+        String result=null;
+        String[] shellArgs = new String[2];
+        shellArgs[0] = "-i";
+        shellArgs[1] = device;
+        result = new CaseDispatcher().shellRun(NETWORK_FAULT_REVOKE, shellArgs);
+        return resultValidate(result);
+    }
 }
+

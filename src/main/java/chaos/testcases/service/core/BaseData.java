@@ -16,4 +16,6 @@ public class BaseData {
     public static final String DISK_IO_BUSY_INJECT = "src/main/shell/disk/disk_io_busy.sh";
     public static final String DISK_IO_BUSY_REVOKE = "src/main/shell/disk/disk_io_busy_revoke.sh";
 
+    public static final String NETWORK_FAULT_INJECT = "src/main/shell/easy_traffic/autotc.sh";
+    public static final String NETWORK_FAULT_REVOKE = "src/main/shell/easy_traffic/clean.sh";
 }
