@@ -41,7 +41,7 @@ tidbtest
 curl -H "Content-type:application/json" -X POST \
 --data '{"saveCase":true,
 	"sqlCase":{
-		"sqlValue":"CREATE DATABASE IF NOT EXISTS tpcds_test_db; use tpcds_test_db;create table IF NOT EXISTS et_store_sales(ss_sold_date_sk bigint,ss_net_profit decimal(7,2)); show create table et_store_sales; drop table et_store_sales;drop database tpcds_test_db;",
+		"sqlValue":"CREATE DATABASE IF NOT EXISTS tpcds_test_db; create table IF NOT EXISTS tpcds_test_db.et_store_sales(ss_sold_date_sk bigint,ss_net_profit decimal(7,2)); show create tpcds_test_db.table et_store_sales; drop table tpcds_test_db.et_store_sales;drop database tpcds_test_db;",
     	"sqlType":"DDL_CREATE",
     	"description":"tpcds_sql-创建DB-创建表-删除表-删除db"
 	}
@@ -51,9 +51,9 @@ http://localhost:9091/case/sql/case/run
 +------+--------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+------------+-------------------------------------------------+------------------+
 | id   | uuid                                 | sql_val                                                                                                                                                                                                                                               | sql_type   | description                                     | create_timestamp |
 +------+--------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+------------+-------------------------------------------------+------------------+
-| 1008 | 9f732452-3bb8-4109-8063-5807835e3224 | CREATE DATABASE IF NOT EXISTS tpcds_test_db; use tpcds_test_db;create table IF NOT EXISTS et_store_sales(ss_sold_date_sk bigint,ss_net_profit decimal(7,2)); show create table et_store_sales; drop table et_store_sales;drop database tpcds_test_db; | DDL_CREATE | tpcds_sql-创建DB-创建表-删除表-删除db           | 1564236215090    |
-| 2506 | 4809bda2-874f-48b4-99c5-284752c2b045 | CREATE DATABASE IF NOT EXISTS tpcds_test_db_0;use tpcds_test_db_0;create table IF NOT EXISTS et_store_sales0( ss_sold_date_sk bigint, ss_sold_time_sk bigint, ss_item_sk bigint, ss_customer_sk bigint, ss_cdemo_sk bigint, ss_hdemo_sk bigint, ss_addr_sk bigint, ss_store_sk bigint, ss_promo_sk bigint, ss_ticket_number bigint, ss_quantity int, ss_wholesale_cost decimal(7,2), ss_list_price decimal(7,2), ss_sales_price decimal(7,2), ss_ext_discount_amt decimal(7,2), ss_ext_sales_price decimal(7,2), ss_ext_wholesale_cost decimal(7,2), ss_ext_list_price decimal(7,2), ss_ext_tax decimal(7,2), ss_coupon_amt decimal(7,2), ss_net_paid decimal(7,2), ss_net_paid_inc_tax decimal(7,2), ss_net_profit decimal(7,2)); ALTER TABLE et_store_sales0 ADD column_test bigint; ALTER TABLE et_store_sales0 DROP column_test; drop table et_store_sales0;drop database tpcds_test_db_0; | DDL_ALTER  | tpcds_sql-创建DB-创建表-修改表-删除表-删除db              | 1564280256913    |
-| 2507 | cd791074-6de6-4f8a-b921-5449eb282ded | CREATE DATABASE IF NOT EXISTS tpcds_test_db_0;use tpcds_test_db_0;create table IF NOT EXISTS et_store_sales0( ss_sold_date_sk bigint, ss_sold_time_sk bigint, ss_item_sk bigint, ss_customer_sk bigint, ss_cdemo_sk bigint, ss_hdemo_sk bigint, ss_addr_sk bigint, ss_store_sk bigint, ss_promo_sk bigint, ss_ticket_number bigint, ss_quantity int, ss_wholesale_cost decimal(7,2), ss_list_price decimal(7,2), ss_sales_price decimal(7,2), ss_ext_discount_amt decimal(7,2), ss_ext_sales_price decimal(7,2), ss_ext_wholesale_cost decimal(7,2), ss_ext_list_price decimal(7,2), ss_ext_tax decimal(7,2), ss_coupon_amt decimal(7,2), ss_net_paid decimal(7,2), ss_net_paid_inc_tax decimal(7,2), ss_net_profit decimal(7,2)); ALTER TABLE et_store_sales0 CHANGE COLUMN ss_cdemo_sk ss_cdemo_sk_new_test bigint; drop table et_store_sales0;drop database tpcds_test_db_0;                | DDL_ALTER  | tpcds_sql-创建DB-创建表-修改表(change column)-删除表-删除db              | 1564281029228    |
+| 1008 | 9f732452-3bb8-4109-8063-5807835e3224 | CREATE DATABASE IF NOT EXISTS tpcds_test_db; create table IF NOT EXISTS tpcds_test_db.et_store_sales(ss_sold_date_sk bigint,ss_net_profit decimal(7,2)); show create table tpcds_test_db.et_store_sales; drop table tpcds_test_db.et_store_sales;drop database tpcds_test_db; | DDL_CREATE | tpcds_sql-创建DB-创建表-删除表-删除db           | 1564236215090    |
+| 2506 | 4809bda2-874f-48b4-99c5-284752c2b045 | CREATE DATABASE IF NOT EXISTS tpcds_test_db_0;create table IF NOT EXISTS tpcds_test_db_0.et_store_sales0( ss_sold_date_sk bigint, ss_sold_time_sk bigint, ss_item_sk bigint, ss_customer_sk bigint, ss_cdemo_sk bigint, ss_hdemo_sk bigint, ss_addr_sk bigint, ss_store_sk bigint, ss_promo_sk bigint, ss_ticket_number bigint, ss_quantity int, ss_wholesale_cost decimal(7,2), ss_list_price decimal(7,2), ss_sales_price decimal(7,2), ss_ext_discount_amt decimal(7,2), ss_ext_sales_price decimal(7,2), ss_ext_wholesale_cost decimal(7,2), ss_ext_list_price decimal(7,2), ss_ext_tax decimal(7,2), ss_coupon_amt decimal(7,2), ss_net_paid decimal(7,2), ss_net_paid_inc_tax decimal(7,2), ss_net_profit decimal(7,2)); ALTER TABLE tpcds_test_db_0.et_store_sales0 ADD column_test bigint; ALTER TABLE tpcds_test_db_0.et_store_sales0 DROP column_test; drop table tpcds_test_db_0.et_store_sales0;drop database tpcds_test_db_0; | DDL_ALTER  | tpcds_sql-创建DB-创建表-修改表-删除表-删除db              | 1564280256913    |
+| 2507 | cd791074-6de6-4f8a-b921-5449eb282ded | CREATE DATABASE IF NOT EXISTS tpcds_test_db_0;create table IF NOT EXISTS tpcds_test_db_0.et_store_sales1( ss_sold_date_sk bigint, ss_sold_time_sk bigint, ss_item_sk bigint, ss_customer_sk bigint, ss_cdemo_sk bigint, ss_hdemo_sk bigint, ss_addr_sk bigint, ss_store_sk bigint, ss_promo_sk bigint, ss_ticket_number bigint, ss_quantity int, ss_wholesale_cost decimal(7,2), ss_list_price decimal(7,2), ss_sales_price decimal(7,2), ss_ext_discount_amt decimal(7,2), ss_ext_sales_price decimal(7,2), ss_ext_wholesale_cost decimal(7,2), ss_ext_list_price decimal(7,2), ss_ext_tax decimal(7,2), ss_coupon_amt decimal(7,2), ss_net_paid decimal(7,2), ss_net_paid_inc_tax decimal(7,2), ss_net_profit decimal(7,2)); ALTER TABLE tpcds_test_db_0.et_store_sales1 CHANGE COLUMN ss_cdemo_sk ss_cdemo_sk_new_test bigint; drop table tpcds_test_db_0.et_store_sales1;drop database tpcds_test_db_0;                | DDL_ALTER  | tpcds_sql-创建DB-创建表-修改表(change column)-删除表-删除db              | 1564281029228    |
 
 暂时包含了：DDL_CREATE、DDL_ALTER两类case;
 ```
@@ -71,11 +71,14 @@ INSERT INTO transaction_db_test.trans_tbl_test(user_id, account_val) VALUES ("u_
 
 (1) 事务提交case：
 ```
+新增Transaction sql：
+
 curl -H "Content-type:application/json" -X POST \
 --data '{"saveCase":true,"sqlCase":{"sqlValue":"update transaction_db_test.trans_tbl_test set account_val = (account_val+500) where user_id=\"u_00001\"; update transaction_db_test.trans_tbl_test set account_val = (account_val-500) where user_id=\"u_00002\";","sqlType":"transaction_sql","description":"事务-多次update-commited"},"runOpt":{"loop":1,"parallel":2}}' \
 http://localhost:9091/case/sql/submit
 
 | 3508 | eacf84c6-b842-4728-9159-546db786234f | update transaction_db_test.trans_tbl_test set account_val = (account_val+500) where user_id="u_00001"; update transaction_db_test.trans_tbl_test set account_val = (account_val-500) where user_id="u_00002";    | transaction_sql | 事务-多次update-commited                                                 | 1564323052364    |
+
 
 log:
 2019-07-28 22:10:52.528  INFO 36596 --- [ool-15-thread-1] c.t.service.tools.TransactionExecutor    : sql transaction commited.
@@ -103,6 +106,8 @@ mysql> select * from trans_tbl_test;
 (2)事务回滚case:
 
 ```
+Transaction sql：
+
 新增一个事务胡回滚case,并保存case；
 curl -H "Content-type:application/json" -X POST \
 --data '{"saveCase":true,"sqlCase":{"sqlValue":"update transaction_db_test.trans_tbl_test set account_val = (account_val-500) where user_id=\"u_00001\"; update transaction_db_test.trans_tbl_test set account_val = (account_val+500) where user_id=\"u_00002\"; INSERT INTO transaction_db_test.trans_tbl_test(user_id, account_val) VALUES (\"u_00001\", 5000);","sqlType":"transaction_sql","description":"事务-多次update-insert-rollbacked"},"runOpt":{"loop":1,"parallel":2}}' \
